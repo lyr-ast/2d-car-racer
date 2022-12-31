@@ -1,6 +1,7 @@
 import pygame
 from random import choice
 
+
 pygame.init()
 screen = pygame.display.set_mode((700, 730))
 pygame.display.set_caption("2D car racer")
@@ -65,13 +66,13 @@ def obj_movement(obj):                          #spawns, moves and removes obsta
         return []
 
 def collisions(car, obj):                       #checks for collision between car and the obstacles
-    if not gameend:
+    if maingame:
         for o in obj:
             if car.colliderect(o):
                 return True
     return False
 
-def display_score(x, y, color):                  #displays score    
+def display_score(x, y, color):                   #displays score  
     score_text = font.render(f"SCORE: {score}", True, color)
     screen.blit(score_text, (x, y))
 
@@ -90,31 +91,34 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == spawn_obj_event and maingame:  #spawns obstacles
+
+            
+        if event.type == spawn_obj_event and maingame:  #calls a function to spawn obstacles when there is a spawn_obj_event
             spawn_obj()
 
-        if event.type == score_event and maingame:
+        if event.type == score_event and maingame:      #adds 1 to score when there is a score_event
             score += 1
 
         if event.type == pygame.KEYDOWN:
                             
-            if event.key == pygame.K_ESCAPE:                  #exits the game when esc is pressed
+            if event.key == pygame.K_ESCAPE:             #exits the game when esc is pressed
                     running = False
+ 
                     
             if event.key == pygame.K_RETURN:
                 
-                if not maingame and not gameend:
-                    maingame = True                             #starts the music and main game from the mainmenu
+                if not maingame and not gameend:                     #starts the music and main game from the mainmenu
                     pygame.mixer.music.fadeout(200)
                     pygame.mixer.music.load("music/game.mp3")
                     pygame.mixer.music.play()
                     pygame.mixer.music.set_volume(.6) 
+                    maingame = True
                     
-                if gameend:                                         #relaunches the game after it ends and resets the obstacles and car
+                if gameend:                                         #relaunches the game after it ends and resets the score
                     gameend = False
                     maingame = True
-                    pygame.mixer.music.play()
                     score = 0
+                    pygame.mixer.music.play()
                     
             if event.key == pygame.K_LEFT:
                 left = True
@@ -136,29 +140,30 @@ while running:
             screen.blit(road, (111.5, 500*i + scroll))
         scroll += 7
 
-        if scroll > 500:  #checks if the road is out of screen 
+        if scroll > 500:  #checks if the road is out of screen and deletes the road out of the screen
             scroll = 0
 
-        screen.blit(car, car_r)
+        screen.blit(car, car_r)   
 
-        if left:          #moves the car left or right
+        if left:             #moves the car left and right when it detects that the left/right variable is True
             car_r.x -= 4
         if right:
             car_r.x +=4
     
-        if collisions(car_r, [o[1] for o in obj_list]):          #if the collision function returns True it ends the game
+        if collisions(car_r, [o[1] for o in obj_list]):          #checks if the car collides with a obstacle and ends the game
             maingame = False
             gameend = True
 
-        if car_r.collidepoint(577, 450) or car_r.collidepoint(116, 450):      #checks if car goes out of the road
+        if car_r.collidepoint(577, 450) or car_r.collidepoint(116, 450):      #checks if car goes out of the road and ends the game
             gameend = True
             maingame = False
 
-        obj_list = obj_movement(obj_list)
-        display_score(5, 10, "lightblue")
+        obj_list = obj_movement(obj_list)    #updates the list of obstacles
+
+        display_score(5, 10, "darkgrey")     #displays and updates the score in the top-left corner of the screen
 
 
-    if gameend:                     #shows the game over screen, resets cars, displays score
+    if gameend:                     #shows the game over screen, resets cars and obstacles and displays score
         screen.blit(dead, (0, 0))
         car_r.x = 375
         obj_list = []
@@ -167,4 +172,5 @@ while running:
 
     pygame.display.update()
     clock.tick(60)
-
+    
+pygame.quit()
